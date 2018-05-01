@@ -54,3 +54,6 @@ web3.eth
   .then(result => {
     console.log(result)
   })
+  .catch(e => {
+    console.log('Wallet connect error', e)
+  })

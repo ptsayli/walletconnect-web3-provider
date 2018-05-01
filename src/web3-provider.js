@@ -118,37 +118,57 @@ export default class WalletConnectProvider {
     }
 
     // create new session
-    return webconnector
-      .createSession()
-      .then(obj => {
-        // show QR code for walletconnect compatible app
-        frame = getNewFrame(obj)
-        // attach to body
-        document.body.appendChild(frame)
+    return webconnector.createSession().then(obj => {
+      // show QR code for walletconnect compatible app
+      frame = getNewFrame(obj)
+      // attach to body
+      document.body.appendChild(frame)
+
+      // start listening session status
+      return new Promise((resolve, reject) => {
+        // setup listener
+        let sessionListener = null
+        function closeSession() {
+          if (sessionListener) {
+            sessionListener.stop()
+          }
+
+          sessionListener = null
+        }
+
         // start listening close event or data event
         window.addEventListener('message', e => {
           if (e.data.modalState === 'dismissed') {
             closeFrame()
+
+            // close session
+            closeSession()
+
+            // throw new
+            reject(
+              new Error('Walletconnect session: User denied session creation')
+            )
+          }
+        })
+
+        sessionListener = webconnector.listenSessionStatus((err, result) => {
+          // set webconnector object
+          this.webconnector = webconnector
+
+          // close frame
+          closeFrame()
+
+          // close session
+          closeSession()
+
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
           }
         })
       })
-      .then(() => {
-        return new Promise((resolve, reject) => {
-          webconnector.listenSessionStatus((err, result) => {
-            // set webconnector object
-            this.webconnector = webconnector
-
-            // close frame
-            closeFrame()
-
-            if (err) {
-              reject(err)
-            } else {
-              resolve(result)
-            }
-          })
-        })
-      })
+    })
   }
 
   _sendAsync(payload, callback) {
