@@ -225,10 +225,7 @@ export default class WalletConnectProvider {
     }
 
     // sign transactions and data
-    if (
-      payload.method === 'eth_sendTransaction' ||
-      payload.method === 'eth_signTypedData'
-    ) {
+    if (payload.method === 'eth_signTypedData') {
       return p
         .then(() => {
           return this.webconnector.createTransaction(payload)
@@ -237,6 +234,32 @@ export default class WalletConnectProvider {
           this.webconnector.listenTransactionStatus(
             transactionId,
             getCallback(payload, callback)
+          )
+        })
+        .catch(getCallback(payload, callback))
+    } else if (payload.method === 'eth_sendTransaction') {
+      return p
+        .then(() => {
+          return this.webconnector.createTransaction(payload)
+        })
+        .then(({transactionId}) => {
+          this.webconnector.listenTransactionStatus(
+            transactionId,
+            (err, data) => {
+              if (err) {
+                getCallback(payload, callback)(err, null)
+              } else {
+                this.sendAsync(
+                  {
+                    id: payload.id,
+                    jsonrpc: payload.jsonrpc,
+                    method: 'eth_sendRawTransaction',
+                    params: [data]
+                  },
+                  getCallback(payload, callback)
+                )
+              }
+            }
           )
         })
         .catch(getCallback(payload, callback))
