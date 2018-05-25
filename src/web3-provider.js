@@ -249,14 +249,14 @@ export default class WalletConnectProvider {
               if (err) {
                 getCallback(payload, callback)(err, null)
               } else {
-                this.sendAsync(
+                this._sendAsync(
                   {
                     id: payload.id,
                     jsonrpc: payload.jsonrpc,
                     method: 'eth_sendRawTransaction',
                     params: [data]
                   },
-                  getCallback(payload, callback)
+                  callback
                 )
               }
             }
