@@ -1,6 +1,6 @@
 {
   "name": "walletconnect-providers",
-  "version": "0.0.1-beta.4",
+  "version": "0.0.1-beta.5",
   "description": "Walletconnect providers",
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
