@@ -2,10 +2,15 @@ import {WebConnector} from 'walletconnect'
 import {getNewFrame} from './frame'
 
 let XMLHttpRequest = null
+let localStorage = null
 if (typeof window !== 'undefined' && window.XMLHttpRequest) {
   XMLHttpRequest = window.XMLHttpRequest
 } else {
   throw new Error('XMLHttpRequest not found')
+}
+
+if (typeof window !== 'undefined' && window.localStorage) {
+  localStorage = window.localStorage
 }
 
 function getCallback(payload, cb) {
@@ -102,8 +107,17 @@ export default class WalletConnectProvider {
   }
 
   createWebconnector() {
+    let sessionId, sharedKey, address
+    if (localStorage) {
+      sessionId = localStorage.getItem('sessionId')
+      sharedKey = localStorage.getItem('sharedKey')
+      address = localStorage.getItem('address')
+    }
+
     // create WebConnector
     const webconnector = new WebConnector(this.bridgeURL, {
+      sessionId: sessionId,
+      sharedKey: sharedKey,
       dappName: this.dappName
     })
 
@@ -115,6 +129,14 @@ export default class WalletConnectProvider {
       }
 
       frame = null
+    }
+
+    // session id, shared key and address
+    if (sessionId && sharedKey && address) {
+      // set webconnector object
+      this.webconnector = webconnector
+
+      return Promise.resolve({address: address})
     }
 
     // create new session
@@ -164,6 +186,12 @@ export default class WalletConnectProvider {
           if (err) {
             reject(err)
           } else {
+            // session id and shared key
+            if (localStorage) {
+              localStorage.setItem('sessionId', obj.sessionId)
+              localStorage.setItem('sharedKey', obj.sharedKey)
+              localStorage.setItem('address', result.address)
+            }
             resolve(result)
           }
         })
