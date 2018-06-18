@@ -1,5 +1,5 @@
-import {WebConnector} from 'walletconnect'
-import {getNewFrame} from './frame'
+import { WebConnector } from 'walletconnect'
+import { getNewFrame } from './frame'
 
 let XMLHttpRequest = null
 let localStorage = null
@@ -136,7 +136,7 @@ export default class WalletConnectProvider {
       // set webconnector object
       this.webconnector = webconnector
 
-      return Promise.resolve({address: address})
+      return Promise.resolve({ address: address })
     }
 
     // create new session
@@ -258,7 +258,7 @@ export default class WalletConnectProvider {
         .then(() => {
           return this.webconnector.createTransaction(payload)
         })
-        .then(({transactionId}) => {
+        .then(({ transactionId }) => {
           this.webconnector.listenTransactionStatus(
             transactionId,
             getCallback(payload, callback)
@@ -270,7 +270,7 @@ export default class WalletConnectProvider {
         .then(() => {
           return this.webconnector.createTransaction(payload)
         })
-        .then(({transactionId}) => {
+        .then(({ transactionId }) => {
           this.webconnector.listenTransactionStatus(
             transactionId,
             (err, data) => {
