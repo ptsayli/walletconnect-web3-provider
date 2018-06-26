@@ -1,8 +1,8 @@
 # WalletConnect Web3 Provider
 
-This implements provider for walletconnect protocol.
+This implements provider for walletconnect standard.
 
-You can read more about WalletConnect protocol here: http://walletconnect.org/
+You can read more about WalletConnect standard here: http://walletconnect.org/
 
 ## Example
 
