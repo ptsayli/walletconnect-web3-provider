@@ -33,7 +33,7 @@ export default class WalletConnectProvider {
     password,
     headers,
     webconnector,
-    bridgeURL = 'https://walletconnect.matic.network',
+    bridgeURL = 'https://bridge.walletconnect.org',
     dappName = 'Unknown DApp'
   }) {
     this.host = host
@@ -301,13 +301,11 @@ export default class WalletConnectProvider {
     }
 
     // normal call
-    p
-      .then(() => {
-        this._sendAsync(payload, callback)
-      })
-      .catch(error => {
-        callback(new Error(`Invalid connection ${error}`))
-      })
+    p.then(() => {
+      this._sendAsync(payload, callback)
+    }).catch(error => {
+      callback(new Error(`Invalid connection ${error}`))
+    })
   }
 
   /**

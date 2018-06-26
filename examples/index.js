@@ -6,7 +6,7 @@ function getLoginTypedData(address) {
     {
       type: 'string',
       name: 'App',
-      value: 'matic:wallet'
+      value: 'dapp:wallet'
     },
     {
       type: 'string',
