@@ -1,5 +1,4 @@
 import { WebConnector } from 'walletconnect'
-import { getNewFrame } from './frame'
 
 let XMLHttpRequest = null
 let localStorage = null
@@ -121,16 +120,6 @@ export default class WalletConnectProvider {
       dappName: this.dappName
     })
 
-    // setup frame
-    let frame = null
-    function closeFrame() {
-      if (frame) {
-        document.body.removeChild(frame)
-      }
-
-      frame = null
-    }
-
     // session id, shared key and address
     if (sessionId && sharedKey && address) {
       // set webconnector object
@@ -142,9 +131,10 @@ export default class WalletConnectProvider {
     // create new session
     return webconnector.createSession().then(obj => {
       // show QR code for walletconnect compatible app
-      frame = getNewFrame(obj)
-      // attach to body
-      document.body.appendChild(frame)
+      const event = new window.CustomEvent('walletconnect:session', {
+        detail: JSON.stringify(obj)
+      })
+      window.dispatchEvent(event)
 
       // start listening session status
       return new Promise((resolve, reject) => {
@@ -159,26 +149,27 @@ export default class WalletConnectProvider {
         }
 
         // start listening close event or data event
-        window.addEventListener('message', e => {
-          if (e.data.modalState === 'dismissed') {
-            closeFrame()
+        window.addEventListener('walletconnect:dismissed', e => {
+          // close session
+          closeSession()
 
-            // close session
-            closeSession()
-
-            // throw new
-            reject(
-              new Error('Walletconnect session: User denied session creation')
-            )
-          }
+          // throw new
+          reject(
+            new Error('Walletconnect session: User denied session creation')
+          )
         })
 
         sessionListener = webconnector.listenSessionStatus((err, result) => {
           // set webconnector object
           this.webconnector = webconnector
-
-          // close frame
-          closeFrame()
+          // emit session created event
+          const event = new window.CustomEvent(
+            'walletconnect:session:created',
+            {
+              detail: JSON.stringify({ ...obj, ...result })
+            }
+          )
+          window.dispatchEvent(event)
 
           // close session
           closeSession()
